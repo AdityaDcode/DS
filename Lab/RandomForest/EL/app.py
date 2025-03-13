@@ -1,52 +1,75 @@
-import streamlit as st
-import pandas as pd
+import tkinter as tk
+from tkinter import ttk, messagebox
+import joblib
 import numpy as np
-from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report, confusion_matrix
-import seaborn as sns
-import matplotlib.pyplot as plt
 
-st.title('Random Forest Classifier App')
+# Load the trained Random Forest model
+model = joblib.load('random_forest_model.pkl')
 
-st.sidebar.header('Upload your Excel file')
-uploaded_file = st.sidebar.file_uploader('Upload an Excel file', type=['xlsx'])
+# Function to predict grade based on user inputs
+def predict_grade():
+    try:
+        # Get input values from entry fields
+        p1 = float(entry_p1.get())
+        c1 = float(entry_c1.get())
+        p2 = float(entry_p2.get())
+        c2 = float(entry_c2.get())
+        p3 = float(entry_p3.get())
+        c3 = float(entry_c3.get())
+        r1 = float(entry_r1.get())
+        t1 = float(entry_t1.get())
+        p3t = float(entry_p3t.get())
 
-if uploaded_file is not None:
-    df = pd.read_excel(uploaded_file, header=1)
-    st.write('### Dataset Preview')
-    st.write(df.head())
+        # Prepare input array for prediction
+        input_features = np.array([[p1, c1, p2, c2, p3, c3, r1, t1, p3t]])
+        
+        # Make prediction
+        prediction = model.predict(input_features)
+        
+        # Display the predicted grade
+        result_label.config(text=f"Predicted Grade: {prediction[0]}")
+    except ValueError:
+        messagebox.showerror("Invalid Input", "Please enter valid numerical values.")
 
-    # Data Preprocessing
-    df.dropna(inplace=True)
-    X = df.drop(['Sl No ', 'USN ', 'Name ', 'Title ', 'Grade'], axis=1)
-    y = LabelEncoder().fit_transform(df['Grade'])
+# Create the main application window
+root = tk.Tk()
+root.title("Grade Prediction App")
+root.geometry("400x400")
 
-    # Train-Test Split
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+# Input labels and entry fields
+ttk.Label(root, text="P1 (Marks):").grid(row=0, column=0, padx=10, pady=5)
+entry_p1 = ttk.Entry(root)
+entry_p1.grid(row=0, column=1, padx=10, pady=5)
 
-    # Model Training
-    rf = RandomForestClassifier(random_state=42)
-    rf.fit(X_train, y_train)
-    y_pred = rf.predict(X_test)
+ttk.Label(root, text="C1 (Credits):").grid(row=1, column=0, padx=10, pady=5)
+entry_c1 = ttk.Entry(root)
+entry_c1.grid(row=1, column=1, padx=10, pady=5)
 
-    # Evaluation Metrics
-    accuracy = accuracy_score(y_test, y_pred)
-    precision = precision_score(y_test, y_pred, average='weighted')
-    recall = recall_score(y_test, y_pred, average='weighted')
-    f1 = f1_score(y_test, y_pred, average='weighted')
+ttk.Label(root, text="P2 (Marks):").grid(row=2, column=0, padx=10, pady=5)
+entry_p2 = ttk.Entry(root)
+entry_p2.grid(row=2, column=1, padx=10, pady=5)
 
-    st.write(f'### Accuracy: {accuracy:.4f}')
-    st.write(f'### Precision: {precision:.4f}')
-    st.write(f'### Recall: {recall:.4f}')
-    st.write(f'### F1 Score: {f1:.4f}')
+ttk.Label(root, text="C2 (Credits):").grid(row=3, column=0, padx=10, pady=5)
+entry_c2 = ttk.Entry(root)
+entry_c2.grid(row=3, column=1, padx=10, pady=5)
 
-    # Confusion Matrix
-    cm = confusion_matrix(y_test, y_pred)
-    fig, ax = plt.subplots()
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax)
-    plt.xlabel('Predicted Label')
-    plt.ylabel('True Label')
-    st.pyplot(fig)
+ttk.Label(root, text="P3 (Marks):").grid(row=4, column=0, padx=10, pady=5)
+entry_p3 = ttk.Entry(root)
+entry_p3.grid(row=4, column=1, padx=10, pady=5)
+
+ttk.Label(root, text="C3 (Credits):").grid(row=5, column=0, padx=10, pady=5)
+entry_c3 = ttk.Entry(root)
+entry_c3.grid(row=5, column=1, padx=10, pady=5)
+
+ttk.Label(root, text="R1 (Report Marks):").grid(row=6, column=0, padx=10, pady=5)
+entry_r1 = ttk.Entry(root)
+entry_r1.grid(row=6, column=1, padx=10, pady=5)
+
+ttk.Label(root, text="T1 (Thesis Marks):").grid(row=7, column=0, padx=10, pady=5)
+entry_t1 = ttk.Entry(root)
+entry_t1.grid(row=7, column=1, padx=10, pady=5)
+
+ttk.Label(root, text="P3T (Project 3 Total):").grid(row=8, column=0, padx=10, pady=5)
+entry_p3t = ttk.Entry(root)
+entry_p3t.grid(row=8,column =  1,padx =  10,pady
 
